@@ -1,0 +1,85 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+#import file path
+file_path = 'C:\\Users\\acer\\Desktop\\Python\\dataset\\sales_data.csv'
+#read csv file
+sales = pd.read_csv(file_path)
+#display first 5 rows of the dataframe
+sales.head()
+
+# Shape of the dataframe
+sales.shape
+sales.info()
+sales.describe()
+
+# Numerical Analysis and Visualization
+sales["Unit_Cost"].describe()
+
+# Creating box chart
+sales["Unit_Cost"].plot(kind='box', vert=False, figsize=(14,6))
+axe = sales["Unit_Cost"].plot(kind='density',figsize=(14,6))
+axe.axvline(sales["Unit_Cost"].mean(), color='red')
+axe.axvline(sales["Unit_Cost"].median(), color = 'green')
+
+# Distribution of Sales using Histogram
+ax = sales["Unit_Cost"].plot(kind='hist', bins=10, figsize=(10,6)) 
+ax.set_ylabel('Number of sales') 
+ax.set_xlabel('Unit Cost') 
+
+# Relationship between Numerical Variables
+# Computing correlation only for numeric columns
+corr = sales.select_dtypes(include=[np.number]).corr() #selects only columns from data frame that have a numeric data type
+corr
+fig = plt.figure(figsize=(12,10), num=1) #Creates whole window with size 12*10 inches
+ax = fig.add_subplot(1,1,1) #Creates a single plot in the window
+
+# Set the title of the plot
+plt.title('Correlation Matrix of numerical variables', fontsize=16, pad =35)
+plt.tight_layout() #automatically adjusts subplot params so that the subplot(s) fits in to the figure area
+fig.align_xlabels() #aligns x labels
+fig.align_ylabels() #aligns y labels
+plt.matshow(corr, cmap = 'RdBu', fignum=0, vmin = -1, vmax= 1) # create matrix plot with colormap ranging from -1 to 1
+plt.xticks(range(len(corr.columns)), corr.columns,ha="center", size = 'small', rotation=45) # x axis labels to be column names from corelation matrix
+plt.yticks(range(len(corr.columns)), corr.columns, size='small', color='Black') 
+cb = plt.colorbar() #legend that maps colors to correlation values
+cb.ax.tick_params(labelsize=10) #colorbar legend font size
+
+# Scatter plot between two numerical variables
+sales.plot(kind='scatter', x='Unit_Cost', y='Unit_Price', colormap='viridis', color= 'Yellow')
+sales.plot(kind='scatter', x='Unit_Cost', y='Revenue', colormap='viridis', color= 'Yellow')
+
+# Box plot for numerical data
+boxplot_cols= ['Unit_Cost', 'Unit_Price', 'Revenue', 'Order_Quantity']
+sales[boxplot_cols].plot(kind='box', subplots= True, layout =[3,3],figsize = (20,20))
+
+# Categorical Analysis and Visualization
+sales['Age_Group'].value_counts()
+amy = sales['Age_Group'].value_counts().plot(kind='bar',figsize=(10,6))
+amy.set_ylabel('Number of sales')
+sales['Age_Group'].value_counts().plot(kind='pie', figsize=(10,6))
+
+# Column Wrangling
+sales['Revenue_per_Head'] = sales['Revenue']/sales['Customer_Age']
+sales['Revenue_per_Head'].head() 
+sales['Revenue_per_Head'].describe() 
+sales['Calculated_Cost'] = sales['Unit_Cost'] * sales['Order_Quantity']
+sales.plot(kind = "scatter", x= 'Calculated_Cost', y='Profit', color= "Red")
+
+# Increasing unit price by 3%
+sales['Unit_Price'] += 1.3
+sales['Unit_Price'].head()
+
+# Sales per year
+sales['Year'].value_counts()
+
+# Sales per category
+sales['Product_Category'].value_counts().plot(kind='pie', figsize=(10,6))
+
+# How many men had more than 500 in revenue?
+# loc() function for accessing labels "row" here 
+sales.loc[(sales['Customer_Gender'] == 'M') & (sales['Revenue'] == 500)].shape[0]
+
+# Top 10 sales with highest revenue
+sales.sort_values(['Revenue'], ascending=False).head(10)
